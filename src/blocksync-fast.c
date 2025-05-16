@@ -749,8 +749,9 @@ void init_params(void)
 	if ((flag.oper_mode == MAKEDELTA && delta.path == NULL) || (flag.oper_mode == MAKEDIGEST && digest.path == NULL))
 		flag.prst = stderr;
 
-	if (flag.silent)
-		freopen("/dev/null", "w", flag.prst);
+	if (flag.silent) {
+		__attribute__((unused))FILE *f = freopen("/dev/null", "w", flag.prst);
+	}
 
 	init_map_methods();
 

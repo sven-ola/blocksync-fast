@@ -22,5 +22,6 @@
 off_t parse_units(char *size);
 char *format_units(off_t size, bool show_bytes);
 off_t p2r(off_t x);
+void hexdump(FILE *stream, void *data, size_t size);
 
 #endif

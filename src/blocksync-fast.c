@@ -115,6 +115,10 @@ void print_help(void)
 					   "  (default:2M)\n"
 					   "\n"
 
+					   "--md5extra=<md5sum img>\n"
+					   "  Checks destination image after transfer using this md5sum\n"
+					   "\n"
+
 					   "--progress, --show-progress\n"
 					   "  Show current progress while syncing\n"
 					   "\n"
@@ -294,6 +298,7 @@ void parse_options(int argc, char **argv)
 		{"digest", required_argument, 0, 'f'},
 		{"delta", required_argument, 0, 'D'},
 		{"buffer-size", required_argument, 0, 1001},
+		{"md5extra", required_argument, 0, 1002},
 		{"block-size", required_argument, 0, 'b'},
 		{"algo", required_argument, 0, 'a'},
 		{"list-algos", no_argument, 0, 'l'},
@@ -343,6 +348,9 @@ void parse_options(int argc, char **argv)
 			break;
 		case 1001:
 			param.max_buf_size = parse_units(optarg);
+			break;
+		case 1002:
+			param.md5extra = optarg;
 			break;
 		case 'l':
 			print_algos();
@@ -672,6 +680,38 @@ void apply_delta(void)
 	applydelta_wri_flush_buf(dst.block_size);
 }
 
+void check_md5extra(void)
+{
+	int i = 0;
+	while (i < sizeof(delta_header.md5extra) && 0 == delta_header.md5extra[i])
+	{
+		i++;
+	}
+	if (i < sizeof(delta_header.md5extra))
+	{
+		char cmd[1024];
+		char md5[2 * (sizeof(delta_header.md5extra) + 1)];
+
+		for(i = 0; i < sizeof(delta_header.md5extra); i++)
+		{
+			sprintf(md5 + 2 * i, "%02x", delta_header.md5extra[i]);
+		}
+		snprintf(cmd, sizeof(cmd) - 1, "echo \"%s  %s\"|md5sum -c", md5, dst.path);
+		errno = 0;
+		if (0 != system(cmd))
+		{
+			if (0 != errno)
+			{
+				fprintf(stderr, "%s: cannot exec \'%s\': %s\n", process_name, cmd, strerror(errno));
+			}
+			else
+			{
+				fprintf(stderr, "%s: target \'%s\' does not match md5sum %s\n", process_name, dst.path, md5);
+			}
+			exit(EXIT_FAILURE);
+		}
+	}
+}
 void make_digest(void)
 {
 	size_t digest_flush = 0;
@@ -1009,6 +1049,7 @@ int main(int argc, char **argv)
 	case APPLYDELTA:
 		init_params();
 		apply_delta();
+		check_md5extra();
 		print_summary();
 		break;
 

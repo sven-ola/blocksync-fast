@@ -137,7 +137,8 @@ extern struct bsf_header
 	uint64_t total_blocks;
 	uint64_t timestamp;
 	uint64_t hash_type;
-	char padding[448];
+	unsigned char md5extra[16];
+	char padding[432];
 } digest_header, delta_header;
 
 extern struct symbol_value_desc
@@ -184,6 +185,7 @@ extern struct param
 	bool hash_use;
 	const char *hash_algo;
 	struct symbol_value_desc algo;
+	char *md5extra;
 } param;
 
 enum oper_modes

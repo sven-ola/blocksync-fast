@@ -47,6 +47,10 @@ void digest_read_header(void)
     get_ptr(&digest);
     memcpy((char *)&digest_header.hash_type, (const void *)digest.ptr_r, sizeof(digest_header.hash_type));
     digest.rel_off += sizeof(digest_header.hash_type);
+
+    get_ptr(&digest);
+    memcpy((char *)&digest_header.md5extra, (const void *)digest.ptr_r, sizeof(digest_header.md5extra));
+    digest.rel_off += sizeof(digest_header.md5extra);
 }
 
 void delta_read_header(void)
@@ -78,6 +82,10 @@ void delta_read_header(void)
     get_ptr(&delta);
     memcpy((char *)&delta_header.hash_type, (const void *)delta.ptr_r, sizeof(delta_header.hash_type));
     delta.rel_off += sizeof(delta_header.hash_type);
+
+    get_ptr(&delta);
+    memcpy((char *)&delta_header.md5extra, (const void *)delta.ptr_r, sizeof(delta_header.md5extra));
+    delta.rel_off += sizeof(delta_header.md5extra);
 }
 
 bool adjust_buffer(size_t *max_buf_size, size_t block_size)

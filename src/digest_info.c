@@ -192,4 +192,15 @@ void delta_info(void)
 
 	strftime(timestr, sizeof(timestr), "%Y-%m-%d %H:%M:%S", dt);
 	fprintf(flag.prst, "Create time: %s\n", timestr);
+
+	int i = 0;
+	while (i < sizeof(delta_header.md5extra) && 0 == delta_header.md5extra[i])
+	{
+		i++;
+	}
+	if (i < sizeof(delta_header.md5extra))
+	{
+		fprintf(flag.prst, "Md5 extra:");
+		hexdump(flag.prst, delta_header.md5extra, sizeof(delta_header.md5extra));
+	}
 }

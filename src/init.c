@@ -378,6 +378,7 @@ void init_digest_file()
     digest_header.total_blocks = param.num_blocks;
     digest_header.timestamp = time(NULL);
     digest_header.hash_type = param.algo.value;
+    memset(digest_header.md5extra, '\0', sizeof(digest_header.md5extra));
     memset(digest_header.padding, '\0', sizeof(digest_header.padding));
 
     if (IS_MODE(digest.open_mode, MMAP))
@@ -470,8 +471,22 @@ void init_dst_delta(void)
     delta_header.total_blocks = param.num_blocks;
     delta_header.timestamp = time(NULL);
     delta_header.hash_type = 0;
-    memset(delta_header.padding, '\0', sizeof(delta_header.padding));
+    memset(digest_header.md5extra, '\0', sizeof(digest_header.md5extra));
+    if (NULL != param.md5extra)
+    {
+        char* p = param.md5extra;
+        for (int i = 0; i < sizeof(delta_header.md5extra); i++)
+        {
+            unsigned int value;
 
+            if (0 == *p) break;
+            sscanf(p, "%2x", &value);
+            delta_header.md5extra[i] = value & 0xff;
+            if (0 == *++p) break;
+            p++;
+        }
+    }
+    memset(delta_header.padding, '\0', sizeof(delta_header.padding));
     if (IS_MODE(delta.open_mode, MMAP_W))
     {
         get_ptr(&delta);

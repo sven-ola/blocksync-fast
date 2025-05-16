@@ -87,3 +87,12 @@ off_t p2r(off_t x)
     x |= x >> 32;
     return x + 1;
 }
+
+void hexdump(FILE *stream, void *data, size_t size)
+{
+    unsigned char* p = (unsigned char*)data;
+    while(0 < size--) {
+        fprintf(stream, " %02x", (unsigned int)*p++);
+    }
+    fprintf(stream, "\n:");
+}
